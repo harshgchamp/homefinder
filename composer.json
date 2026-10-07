@@ -19,7 +19,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",
-        "larastan/larastan": "^3.9",
+        "larastan/larastan": "*",
         "laravel/boost": "^2.2",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
@@ -67,8 +67,11 @@
             "npm run types:check",
             "@test"
         ],
+        "analyse": [
+            "phpstan analyse --memory-limit=1G"
+        ],
         "types:check": [
-            "phpstan analyse"
+            "@analyse"
         ],
         "test": [
             "@php artisan config:clear --ansi",
