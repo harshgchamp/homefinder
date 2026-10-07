@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('properties', function (Blueprint $table) {
-            $table->id();$table->foreignId('agency_id')->constrained()->restrictOnDelete();
+            $table->id();
+            $table->foreignId('agency_id')->constrained()->restrictOnDelete();
             $table->foreignId('property_type_id')->constrained()->restrictOnDelete();
 
             $table->string('title');
@@ -27,7 +28,7 @@ return new class extends Migration
 
             $table->string('address_line_1');
             $table->string('city', 100);
-            $table->string('postcode', 10); 
+            $table->string('postcode', 10);
 
             $table->string('status', 20)->default('available');
             $table->timestamp('published_at')->nullable();

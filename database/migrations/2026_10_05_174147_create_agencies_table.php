@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('agencies', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique();
+            $table->string('slug')->unique();
+            $table->string('email')->unique();
+            $table->string('phone', 30);
+            $table->string('logo_path')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

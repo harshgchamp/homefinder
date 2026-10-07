@@ -4,7 +4,11 @@ namespace App\Models;
 
 use App\Enums\ListingType;
 use App\Enums\PropertyStatus;
+use Database\Factories\PropertyFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,7 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Property extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<PropertyFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'agency_id',
@@ -68,6 +73,17 @@ class Property extends Model
                 return substr($compact, 0, -3).' '.substr($compact, -3);
             },
         );
+    }
+
+    /**
+     * Only published listings (published_at set and not in the future).
+     *
+     * @param  Builder<Property>  $query
+     */
+    #[Scope]
+    protected function published(Builder $query): void
+    {
+        $query->whereNotNull('published_at')->where('published_at', '<=', now());
     }
 
     /**
