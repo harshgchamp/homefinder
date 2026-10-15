@@ -5,7 +5,7 @@ import type { Passkey } from '@/types/auth';
 import Heading from '@/components/Heading.vue';
 import PasskeyItem from '@/components/PasskeyItem.vue';
 import PasskeyRegister from '@/components/PasskeyRegister.vue';
-import { destroy } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyRegistrationController';
+import { route } from 'ziggy-js';
 
 export type Props = {
     canManagePasskeys?: boolean;
@@ -18,7 +18,7 @@ withDefaults(defineProps<Props>(), {
 });
 
 const handleDelete = (id: number, onError: () => void) => {
-    router.delete(destroy.url(id), {
+    router.delete(route('passkey.destroy', id), {
         preserveScroll: true,
         onError,
     });

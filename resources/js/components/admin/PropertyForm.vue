@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
-import PropertyController from '@/actions/App/Http/Controllers/Admin/PropertyController';
+import { route } from 'ziggy-js';
 import ImageUploader from '@/components/admin/ImageUploader.vue';
 import SelectField from '@/components/admin/SelectField.vue';
 import InputError from '@/components/InputError.vue';
@@ -103,11 +103,11 @@ const submit = (): void => {
         // Why POST + _method: PHP only reads uploaded files on POST requests.
         // Laravel sees _method=put and routes it to update() (method spoofing).
         form.transform((data) => ({ ...data, _method: 'put' })).post(
-            PropertyController.update.url(props.property.id),
+            route('admin.properties.update', props.property.id),
             options,
         );
     } else {
-        form.post(PropertyController.store.url(), options);
+        form.post(route('admin.properties.store'), options);
     }
 };
 </script>
@@ -370,8 +370,8 @@ const submit = (): void => {
                 <Link
                     :href="
                         property
-                            ? PropertyController.show(property.id)
-                            : PropertyController.index()
+                            ? route('admin.properties.show', property.id)
+                            : route('admin.properties.index')
                     "
                     >Cancel</Link
                 >

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Form, Head, Link } from '@inertiajs/vue3';
-import FeatureController from '@/actions/App/Http/Controllers/Admin/FeatureController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { route } from 'ziggy-js';
 import type { Feature } from '@/types';
 
 // Why: a single plain object here, because the controller called resolve()
@@ -33,9 +33,11 @@ defineOptions({
         :description="`Slug: ${props.feature.slug}. Last updated ${props.feature.updated_at}.`"
     />
 
-    <!-- Why update.form(id): builds PUT /admin/features/{id} from the PHP route -->
+    <!-- Why method="put": Inertia sends a real PUT request (via XHR), which matches
+         the resource route's update(). No _method field is needed without files. -->
     <Form
-        v-bind="FeatureController.update.form(props.feature.id)"
+        :action="route('admin.features.update', props.feature.id)"
+        method="put"
         class="max-w-md space-y-6"
         v-slot="{ errors, processing }"
     >
@@ -55,7 +57,7 @@ defineOptions({
         <div class="flex items-center gap-3">
             <Button :disabled="processing">Save changes</Button>
             <Button variant="ghost" as-child>
-                <Link :href="FeatureController.index()">Cancel</Link>
+                <Link :href="route('admin.features.index')">Cancel</Link>
             </Button>
         </div>
     </Form>

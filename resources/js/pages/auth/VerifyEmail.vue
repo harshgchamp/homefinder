@@ -3,8 +3,7 @@ import { Form, Head } from '@inertiajs/vue3';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { logout } from '@/routes';
-import { send } from '@/routes/verification';
+import { route } from 'ziggy-js';
 
 defineOptions({
     layout: {
@@ -31,7 +30,8 @@ defineProps<{
     </div>
 
     <Form
-        v-bind="send.form()"
+        :action="route('verification.send')"
+        method="post"
         class="space-y-6 text-center"
         v-slot="{ processing }"
     >
@@ -40,7 +40,12 @@ defineProps<{
             Resend verification email
         </Button>
 
-        <TextLink :href="logout()" as="button" class="mx-auto block text-sm">
+        <TextLink
+            :href="route('logout')"
+            method="post"
+            as="button"
+            class="mx-auto block text-sm"
+        >
             Log out
         </TextLink>
     </Form>

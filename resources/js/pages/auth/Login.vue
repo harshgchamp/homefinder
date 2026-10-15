@@ -8,9 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
-import { store } from '@/routes/login';
-import { request } from '@/routes/password';
+import { route } from 'ziggy-js';
 import PasskeyVerify from '@/components/PasskeyVerify.vue';
 
 defineOptions({
@@ -39,7 +37,8 @@ defineProps<{
     <PasskeyVerify />
 
     <Form
-        v-bind="store.form()"
+        :action="route('login.store')"
+        method="post"
         :reset-on-success="['password']"
         v-slot="{ errors, processing }"
         class="flex flex-col gap-6"
@@ -65,7 +64,7 @@ defineProps<{
                     <Label for="password">Password</Label>
                     <TextLink
                         v-if="canResetPassword"
-                        :href="request()"
+                        :href="route('password.request')"
                         class="text-sm"
                         :tabindex="5"
                     >
@@ -104,7 +103,7 @@ defineProps<{
 
         <div class="text-center text-sm text-muted-foreground">
             Don't have an account?
-            <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
+            <TextLink :href="route('register')" :tabindex="5">Sign up</TextLink>
         </div>
     </Form>
 </template>

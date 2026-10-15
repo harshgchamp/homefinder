@@ -7,7 +7,7 @@ import TwoFactorRecoveryCodes from '@/components/TwoFactorRecoveryCodes.vue';
 import TwoFactorSetupModal from '@/components/TwoFactorSetupModal.vue';
 import { Button } from '@/components/ui/button';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
-import { disable, enable } from '@/routes/two-factor';
+import { route } from 'ziggy-js';
 
 export type Props = {
     canManageTwoFactor?: boolean;
@@ -51,7 +51,8 @@ onUnmounted(() => clearTwoFactorAuthData());
                 </Button>
                 <Form
                     v-else
-                    v-bind="enable.form()"
+                    :action="route('two-factor.enable')"
+                    method="post"
                     @success="showSetupModal = true"
                     #default="{ processing }"
                 >
@@ -70,7 +71,11 @@ onUnmounted(() => clearTwoFactorAuthData());
             </p>
 
             <div class="relative inline">
-                <Form v-bind="disable.form()" #default="{ processing }">
+                <Form
+                    :action="route('two-factor.disable')"
+                    method="delete"
+                    #default="{ processing }"
+                >
                     <Button
                         variant="destructive"
                         type="submit"

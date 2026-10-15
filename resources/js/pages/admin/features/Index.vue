@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
 import { ref } from 'vue';
-import FeatureController from '@/actions/App/Http/Controllers/Admin/FeatureController';
+import { route } from 'ziggy-js';
 import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,7 @@ watchDebounced(
     search,
     (value) => {
         router.get(
-            FeatureController.index.url(),
+            route('admin.features.index'),
             value ? { search: value } : {},
             {
                 preserveState: true, // keep focus in the search box
@@ -55,7 +55,7 @@ const destroy = (feature: Feature): void => {
         return;
     }
 
-    router.delete(FeatureController.destroy.url(feature.id), {
+    router.delete(route('admin.features.destroy', feature.id), {
         preserveScroll: true,
     });
 };
@@ -72,7 +72,7 @@ const destroy = (feature: Feature): void => {
         />
 
         <Button as-child>
-            <Link :href="FeatureController.create()">Add feature</Link>
+            <Link :href="route('admin.features.create')">Add feature</Link>
         </Button>
     </div>
 
@@ -130,7 +130,8 @@ const destroy = (feature: Feature): void => {
                     </td>
                     <td class="px-4 py-2 text-right whitespace-nowrap">
                         <Button variant="ghost" size="sm" as-child>
-                            <Link :href="FeatureController.edit(feature.id)"
+                            <Link
+                                :href="route('admin.features.edit', feature.id)"
                                 >Edit</Link
                             >
                         </Button>
