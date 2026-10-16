@@ -26,6 +26,11 @@ use Illuminate\Database\Eloquent\Collection;
 #[Description('Move long-running, still available listings back to draft')]
 class ArchiveStaleProperties extends Command
 {
+    /**
+     * A listing with an enquiry in this many days is still "live", however old it is.
+     */
+    public const RECENT_ENQUIRY_DAYS = 30;
+
     public function handle(): int
     {
         $days = (int) $this->option('days');
@@ -41,7 +46,12 @@ class ArchiveStaleProperties extends Command
         $query = Property::query()
             ->published()
             ->where('status', PropertyStatus::Available)
-            ->where('published_at', '<=', now()->subDays($days));
+            ->where('published_at', '<=', now()->subDays($days))
+            // Not stale if people are still asking about it. last_enquiry_at is
+            // kept up to date by the RecordLastEnquiryOnProperty listener.
+            ->where(fn ($q) => $q
+                ->whereNull('last_enquiry_at')
+                ->orWhere('last_enquiry_at', '<', now()->subDays(self::RECENT_ENQUIRY_DAYS)));
 
         $total = $query->count();
 

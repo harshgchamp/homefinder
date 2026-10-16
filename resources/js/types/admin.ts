@@ -61,6 +61,7 @@ export type Property = {
     postcode: string;
     published_at: string | null;
     published_at_input: string | null;
+    last_enquiry_ago?: string | null;
     created_at: string | null;
     updated_ago: string | null;
     deleted_at: string | null;

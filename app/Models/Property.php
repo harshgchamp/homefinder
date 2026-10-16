@@ -38,6 +38,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $city
  * @property string $postcode
  * @property CarbonImmutable|null $published_at
+ * @property CarbonImmutable|null $last_enquiry_at
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  * @property CarbonImmutable|null $deleted_at
@@ -130,6 +131,7 @@ class Property extends Model
             'bathrooms' => 'integer',
             'furnished' => 'boolean',
             'published_at' => 'datetime',
+            'last_enquiry_at' => 'datetime',
         ];
     }
 

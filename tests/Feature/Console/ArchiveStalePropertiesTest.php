@@ -56,3 +56,19 @@ test('processes every row across several chunks', function () {
 test('rejects an invalid --days value', function () {
     $this->artisan('properties:archive-stale', ['--days' => 0])->assertFailed();
 });
+
+test('keeps listings that had an enquiry in the last 30 days', function () {
+    $enquiredRecently = Property::factory()->create([
+        'published_at' => now()->subDays(100),
+        'last_enquiry_at' => now()->subDays(5),
+    ]);
+    $enquiredLongAgo = Property::factory()->create([
+        'published_at' => now()->subDays(100),
+        'last_enquiry_at' => now()->subDays(60),
+    ]);
+
+    $this->artisan('properties:archive-stale')->assertSuccessful();
+
+    expect($enquiredRecently->fresh()->published_at)->not->toBeNull()
+        ->and($enquiredLongAgo->fresh()->published_at)->toBeNull();
+});

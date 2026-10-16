@@ -3,6 +3,7 @@ import { initializeTheme } from '@/composables/useAppearance';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
+import PublicLayout from '@/layouts/PublicLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 
@@ -18,6 +19,9 @@ void createInertiaApp({
                 return AuthLayout;
             case name.startsWith('settings/'):
                 return [AppLayout, SettingsLayout];
+            // Public pages are open to guests; AppLayout's sidebar needs a logged-in user.
+            case name.startsWith('public/'):
+                return PublicLayout;
             case name.startsWith('admin/'):
                 return [AppLayout, AdminLayout];
             default:

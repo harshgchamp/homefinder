@@ -55,6 +55,8 @@ class PropertyResource extends JsonResource
             'published_at' => $this->published_at?->format('j M Y, H:i'),
             // The format an <input type="datetime-local"> expects.
             'published_at_input' => $this->published_at?->format('Y-m-d\TH:i'),
+            // whenHas: the admin list does not select this column.
+            'last_enquiry_ago' => $this->whenHas('last_enquiry_at', fn () => $this->last_enquiry_at?->diffForHumans()),
             'created_at' => $this->created_at?->format('j M Y'),
             'updated_ago' => $this->updated_at?->diffForHumans(),
             'deleted_at' => $this->deleted_at?->format('j M Y'),
