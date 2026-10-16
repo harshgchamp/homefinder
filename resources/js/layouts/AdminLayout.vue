@@ -7,6 +7,7 @@ const links = [
     { title: 'Dashboard', href: '/admin' },
     { title: 'Properties', href: '/admin/properties' },
     { title: 'Features', href: '/admin/features' },
+    { title: 'Notifications', href: '/admin/notifications' },
     // Property types, Agencies: added in the next steps
 ];
 
@@ -27,6 +28,15 @@ const isActive = (href: string): boolean =>
                 :class="{ 'bg-muted font-medium': isActive(link.href) }"
             >
                 {{ link.title }}
+                <!-- Unread count, shared on every page by HandleInertiaRequests -->
+                <span
+                    v-if="
+                        link.href === '/admin/notifications' &&
+                        page.props.unreadNotificationsCount > 0
+                    "
+                    class="ml-1 rounded-full bg-primary px-1.5 text-xs text-primary-foreground tabular-nums"
+                    >{{ page.props.unreadNotificationsCount }}</span
+                >
             </Link>
         </nav>
 

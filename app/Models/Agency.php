@@ -7,11 +7,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Notifications\Notifiable;
 
 class Agency extends Model
 {
-    /** @use HasFactory<AgencyFactory> */
-    use HasFactory;
+    /**
+     * Notifiable: lets an agency receive notifications ($agency->notify(...)).
+     * Any model can be notifiable, not only users. For the mail channel Laravel
+     * sends to the model's "email" attribute.
+     *
+     * @use HasFactory<AgencyFactory>
+     */
+    use HasFactory, Notifiable;
 
     protected $fillable = ['name', 'slug', 'email', 'phone', 'logo_path', 'is_active'];
 

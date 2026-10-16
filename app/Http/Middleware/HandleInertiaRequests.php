@@ -42,6 +42,11 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            // The badge in the admin menu. A closure, so the COUNT query only runs
+            // when the prop is actually sent, and only admins pay for it.
+            'unreadNotificationsCount' => fn (): int => $request->user()?->is_admin
+                ? $request->user()->unreadNotifications()->count()
+                : 0,
         ];
     }
 }

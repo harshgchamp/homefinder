@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FeatureController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PropertyController;
 use App\Http\Controllers\Admin\PropertyExportController;
 use Illuminate\Support\Facades\Route;
@@ -40,3 +41,13 @@ Route::resource('properties', PropertyController::class)
     // Only "show" can open a trashed property; edit/update/destroy still 404 for it.
     ->withTrashed(['show'])
     ->middlewareFor(['store', 'update', 'destroy'], 'throttle:30,1');
+
+// --- Notifications --------------------------------------------------------
+
+Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+// {id} is a UUID string (notifications use UUID primary keys), so whereUuid()
+// rejects anything else before the controller runs.
+Route::post('notifications/{id}/read', [NotificationController::class, 'read'])
+    ->whereUuid('id')
+    ->name('notifications.read');
