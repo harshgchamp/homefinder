@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from '@lucide/vue';
+import { BookOpen, FolderGit2, LayoutGrid, Shield } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
+import { usePage } from '@inertiajs/vue3'; 
+import { computed } from 'vue'; 
 import {
     Sidebar,
     SidebarContent,
@@ -17,12 +19,18 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
+const page = usePage();
+
+const isAdmin = computed(() => page.props.auth.user?.is_admin === true);
+
+
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
     },
+     ...(isAdmin.value ? [{ title: 'Admin', href: '/admin', icon: Shield }] : []),
 ];
 
 const footerNavItems: NavItem[] = [

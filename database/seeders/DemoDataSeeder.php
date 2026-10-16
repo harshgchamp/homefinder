@@ -23,7 +23,7 @@ class DemoDataSeeder extends Seeder
         User::factory()->admin()->create([
             'name' => 'Admin',
             'email' => 'harsh.gandhi01@hotmail.com',
-            'password' => Hash::make('123123123123'),
+            'password' => Hash::make('123123123'),
         ]);
 
         $users = User::factory(10)->create();
