@@ -60,6 +60,11 @@ const details = computed(() => [
     },
     { label: 'Slug', value: props.property.slug },
     { label: 'Published', value: props.property.published_at ?? '—' },
+    // Set by the RecordLastEnquiryOnProperty listener
+    {
+        label: 'Last enquiry',
+        value: props.property.last_enquiry_ago ?? 'Never',
+    },
     { label: 'Created', value: props.property.created_at },
     { label: 'Saved by', value: `${props.property.favourites_count} users` },
 ]);
@@ -118,6 +123,19 @@ const hideBrokenImage = (event: Event): void => {
                 >
             </template>
             <template v-else>
+                <!-- Only published listings have a public page (drafts give 404) -->
+                <Button
+                    v-if="property.publication.value === 'published'"
+                    variant="outline"
+                    as-child
+                >
+                    <a
+                        :href="route('properties.show', property.slug)"
+                        target="_blank"
+                        rel="noopener"
+                        >View public page</a
+                    >
+                </Button>
                 <Button as-child>
                     <Link :href="route('admin.properties.edit', property.id)"
                         >Edit</Link
