@@ -28,3 +28,7 @@ Schedule::command('properties:archive-stale')
 // Permanently delete properties that have been in the trash for 30+ days
 // (Property::prunable()), including their image files via the observer.
 Schedule::command('model:prune')->dailyAt('03:00')->onOneServer();
+
+// Failed jobs are kept in the failed_jobs table so they can be inspected and
+// retried (queue:failed, queue:retry). After a week, remove them.
+Schedule::command('queue:prune-failed', ['--hours' => 168])->daily()->onOneServer();
