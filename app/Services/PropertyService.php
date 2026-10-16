@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\OptimisePropertyImage;
 use App\Models\Property;
 use App\Models\PropertyImage;
 use Illuminate\Http\UploadedFile;
@@ -168,7 +169,15 @@ class PropertyService
         }
 
         // createMany(): one create() per row, each with property_id set by the relationship.
-        $property->images()->createMany($rows);
+        $images = $property->images()->createMany($rows);
+
+        // Hand the slow part (resize, WebP, strip GPS data) to the queue: one job
+        // per image. afterCommit(): this runs inside DB::transaction(), so wait
+        // until the rows are committed. Otherwise a fast worker could look for an
+        // image that does not exist yet, or one that is about to be rolled back.
+        foreach ($images as $image) {
+            OptimisePropertyImage::dispatch($image)->afterCommit();
+        }
     }
 
     /**
