@@ -5,8 +5,8 @@ import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
-import { usePage } from '@inertiajs/vue3'; 
-import { computed } from 'vue'; 
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import {
     Sidebar,
     SidebarContent,
@@ -16,21 +16,22 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { route } from 'ziggy-js';
 import type { NavItem } from '@/types';
 
 const page = usePage();
 
 const isAdmin = computed(() => page.props.auth.user?.is_admin === true);
 
-
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: route('dashboard'),
         icon: LayoutGrid,
     },
-     ...(isAdmin.value ? [{ title: 'Admin', href: '/admin', icon: Shield }] : []),
+    ...(isAdmin.value
+        ? [{ title: 'Admin', href: '/admin', icon: Shield }]
+        : []),
 ];
 
 const footerNavItems: NavItem[] = [
@@ -53,7 +54,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="route('dashboard')">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>

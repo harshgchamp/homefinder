@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-import PropertyController from '@/actions/App/Http/Controllers/Admin/PropertyController';
-import PropertyExportController from '@/actions/App/Http/Controllers/Admin/PropertyExportController';
+import { route } from 'ziggy-js';
 import Pagination from '@/components/admin/Pagination.vue';
 import SelectField from '@/components/admin/SelectField.vue';
 import Heading from '@/components/Heading.vue';
@@ -56,7 +55,7 @@ const { filters, query, activeCount, reset } = useFilters<PropertyFilters>({
         trashed: null,
         sort: 'newest',
     },
-    url: () => PropertyController.index.url(),
+    url: () => route('admin.properties.index'),
     only: RELOAD_ONLY,
 });
 
@@ -90,9 +89,7 @@ const trashedOptions = [
 
 // Why: the export link carries the same query string as the list, so the CSV
 // contains exactly the rows the admin is looking at (on every page, not just this one).
-const exportUrl = computed(() =>
-    PropertyExportController.url({ query: query.value }),
-);
+const exportUrl = computed(() => route('admin.properties.export', query.value));
 
 // --- Bulk selection --------------------------------------------------------
 
@@ -118,7 +115,7 @@ const bulk = (action: 'publish' | 'unpublish' | 'delete'): void => {
     }
 
     router.post(
-        PropertyController.bulk.url(),
+        route('admin.properties.bulk'),
         { action, ids: selected.value },
         {
             preserveScroll: true,
@@ -131,7 +128,7 @@ const bulk = (action: 'publish' | 'unpublish' | 'delete'): void => {
 
 const destroy = (property: Property): void => {
     if (confirm(`Move "${property.title}" to the trash?`)) {
-        router.delete(PropertyController.destroy.url(property.id), {
+        router.delete(route('admin.properties.destroy', property.id), {
             preserveScroll: true,
         });
     }
@@ -139,7 +136,7 @@ const destroy = (property: Property): void => {
 
 const restore = (property: Property): void => {
     router.patch(
-        PropertyController.restore.url(property.id),
+        route('admin.properties.restore', property.id),
         {},
         {
             preserveScroll: true,
@@ -153,7 +150,7 @@ const forceDelete = (property: Property): void => {
             `Permanently delete "${property.title}"? This cannot be undone.`,
         )
     ) {
-        router.delete(PropertyController.forceDelete.url(property.id), {
+        router.delete(route('admin.properties.force-delete', property.id), {
             preserveScroll: true,
         });
     }
@@ -190,7 +187,9 @@ const hideBrokenImage = (event: Event): void => {
                 <a :href="exportUrl">Export CSV</a>
             </Button>
             <Button as-child>
-                <Link :href="PropertyController.create()">Add property</Link>
+                <Link :href="route('admin.properties.create')"
+                    >Add property</Link
+                >
             </Button>
         </div>
     </div>
@@ -383,7 +382,12 @@ const hideBrokenImage = (event: Event): void => {
                             </div>
                             <div class="min-w-0">
                                 <Link
-                                    :href="PropertyController.show(property.id)"
+                                    :href="
+                                        route(
+                                            'admin.properties.show',
+                                            property.id,
+                                        )
+                                    "
                                     class="font-medium hover:underline"
                                 >
                                     {{ property.title }}
@@ -448,7 +452,12 @@ const hideBrokenImage = (event: Event): void => {
                         <template v-else>
                             <Button variant="ghost" size="sm" as-child>
                                 <Link
-                                    :href="PropertyController.edit(property.id)"
+                                    :href="
+                                        route(
+                                            'admin.properties.edit',
+                                            property.id,
+                                        )
+                                    "
                                     >Edit</Link
                                 >
                             </Button>

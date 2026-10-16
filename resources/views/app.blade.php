@@ -36,6 +36,11 @@
 
         @fonts
 
+        {{-- Ziggy: prints the route list as window.Ziggy so route('name') works in Vue.
+             Must come before @vite, because app.ts runs as soon as it loads.
+             Which routes are included is set in config/ziggy.php. --}}
+        @routes
+
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         <x-inertia::head>
             <title>{{ config('app.name', 'Laravel') }}</title>

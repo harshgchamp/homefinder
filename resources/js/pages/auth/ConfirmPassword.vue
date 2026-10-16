@@ -5,11 +5,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { store } from '@/routes/password/confirm';
-import {
-    index as confirmOptions,
-    store as confirmStore,
-} from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyConfirmationController';
+import { route } from 'ziggy-js';
 import PasskeyVerify from '@/components/PasskeyVerify.vue';
 
 defineOptions({
@@ -26,8 +22,8 @@ defineOptions({
 
     <PasskeyVerify
         :routes="{
-            options: confirmOptions(),
-            submit: confirmStore(),
+            options: { url: route('passkey.confirm-options'), method: 'get' },
+            submit: { url: route('passkey.confirm'), method: 'post' },
         }"
         label="Confirm with passkey"
         loading-label="Confirming..."
@@ -35,7 +31,8 @@ defineOptions({
     />
 
     <Form
-        v-bind="store.form()"
+        :action="route('password.confirm.store')"
+        method="post"
         reset-on-success
         v-slot="{ errors, processing }"
     >

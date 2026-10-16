@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Deferred, Head, Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import PropertyController from '@/actions/App/Http/Controllers/Admin/PropertyController';
+import { route } from 'ziggy-js';
 import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -71,17 +71,19 @@ const maxPerMonth = computed(() =>
 
 const destroy = (): void => {
     if (confirm(`Move "${props.property.title}" to the trash?`)) {
-        router.delete(PropertyController.destroy.url(props.property.id));
+        router.delete(route('admin.properties.destroy', props.property.id));
     }
 };
 
 const restore = (): void => {
-    router.patch(PropertyController.restore.url(props.property.id));
+    router.patch(route('admin.properties.restore', props.property.id));
 };
 
 const forceDelete = (): void => {
     if (confirm('Permanently delete this property? This cannot be undone.')) {
-        router.delete(PropertyController.forceDelete.url(props.property.id));
+        router.delete(
+            route('admin.properties.force-delete', props.property.id),
+        );
     }
 };
 
@@ -117,7 +119,7 @@ const hideBrokenImage = (event: Event): void => {
             </template>
             <template v-else>
                 <Button as-child>
-                    <Link :href="PropertyController.edit(property.id)"
+                    <Link :href="route('admin.properties.edit', property.id)"
                         >Edit</Link
                     >
                 </Button>

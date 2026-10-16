@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Form, Head, Link } from '@inertiajs/vue3';
-import FeatureController from '@/actions/App/Http/Controllers/Admin/FeatureController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { route } from 'ziggy-js';
 
 defineOptions({
     layout: {
@@ -26,10 +26,11 @@ defineOptions({
         description="The slug is generated from the name."
     />
 
-    <!-- Why Form + store.form(): the URL and HTTP method come from the PHP route,
-         and Inertia supplies validation errors and a "processing" flag. -->
+    <!-- Why Form: Inertia submits it with XHR and supplies validation errors and a
+         "processing" flag. route('admin.features.store') looks the URL up by route name. -->
     <Form
-        v-bind="FeatureController.store.form()"
+        :action="route('admin.features.store')"
+        method="post"
         class="max-w-md space-y-6"
         v-slot="{ errors, processing }"
     >
@@ -51,7 +52,7 @@ defineOptions({
             <!-- Why :disabled: stops a double click creating the feature twice -->
             <Button :disabled="processing">Save</Button>
             <Button variant="ghost" as-child>
-                <Link :href="FeatureController.index()">Cancel</Link>
+                <Link :href="route('admin.features.index')">Cancel</Link>
             </Button>
         </div>
     </Form>
