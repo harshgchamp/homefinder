@@ -368,6 +368,12 @@ class Property extends Model
     public function images(): HasMany
     {
         return $this->hasMany(PropertyImage::class)
+            // chaperone(): every image loaded through this relation gets its
+            // `property` relation set to this parent automatically. Deleting an
+            // image touches the parent ($touches in PropertyImage), which reads
+            // $image->property; without this, that is one lazy-loaded query per
+            // image, and shouldBeStrict() throws once 2+ images are loaded together.
+            ->chaperone('property')
             ->orderBy('sort_order')
             ->orderBy('id');
     }
