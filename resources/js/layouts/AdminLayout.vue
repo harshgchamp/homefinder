@@ -5,6 +5,7 @@ const page = usePage();
 
 const links = [
     { title: 'Dashboard', href: '/admin' },
+    { title: 'Properties', href: '/admin/properties' },
     { title: 'Features', href: '/admin/features' },
     // Property types, Agencies: added in the next steps
 ];
