@@ -5,10 +5,14 @@ const page = usePage();
 
 const links = [
     { title: 'Dashboard', href: '/admin' },
-    // Property types, Features, Agencies, Properties: added in the next steps
+    { title: 'Features', href: '/admin/features' },
+    // Property types, Agencies: added in the next steps
 ];
 
-const isActive = (href: string): boolean => page.url === href;
+// Why: /admin/features/create and /admin/features/5/edit should also highlight "Features".
+// The dashboard link is matched exactly, otherwise it would be active on every admin page.
+const isActive = (href: string): boolean =>
+    href === '/admin' ? page.url === href : page.url.startsWith(href);
 </script>
 
 <template>

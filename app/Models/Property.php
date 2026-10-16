@@ -21,6 +21,22 @@ class Property extends Model
     /** @use HasFactory<PropertyFactory> */
     use HasFactory, SoftDeletes;
 
+    /**
+     * The table associated with the model. Laravel guesses the table name from
+     * the class name, but this is more explicit and avoids mistakes if the class
+     * is renamed or moved.
+     *
+     * @var string
+     */
+    protected $table = 'properties';
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = true;
+
     protected $fillable = [
         'agency_id',
         'property_type_id',
@@ -42,9 +58,17 @@ class Property extends Model
     /**
      * @var array<string, mixed>
      */
+
+    /* The $attributes property is used to define default values for model attributes. In this case, it sets the default value of the 'status' attribute to 'available'. This means that when a new Property instance is created, if the 'status' attribute is not explicitly set, it will automatically be assigned the value 'available'. This is useful for ensuring that certain attributes have a consistent initial state without requiring explicit assignment each time a new instance is created. */
     protected $attributes = [
         'status' => 'available',
     ];
+
+    /**
+     * The $casts property is used to define how certain attributes should be automatically converted to and from their database representation. In this case, it specifies that the 'listing_type' and 'status' attributes should be cast to their respective enum classes (ListingType and PropertyStatus), while 'price', 'bedrooms', and 'bathrooms' should be treated as integers, 'furnished' as a boolean, and 'published_at' as a datetime object. This ensures that when these attributes are accessed or modified, they are automatically converted to the appropriate data type, making it easier to work with them in the application.
+     *
+     * @return array<string, mixed>
+     */
 
     protected function casts(): array
     {
