@@ -350,3 +350,71 @@ test('formatted price and publication status accessors', function () {
         ->and($sale->publication_status->value)->toBe('scheduled')
         ->and(PropertyStatus::Sold->isAllowedFor(ListingType::Rent))->toBeFalse();
 });
+
+// --- Several images at once ---------------------------------------------------
+// Regression: deleting images one by one used to lazy load $image->property
+// (for $touches), which strict mode forbids once 2+ images are loaded together.
+// One image never triggers it, so these tests use three.
+
+/**
+ * A property with $count images, each with a real file on the fake disk.
+ */
+function propertyWithImages(int $count = 3): Property
+{
+    $property = Property::factory()->create();
+
+    foreach (range(0, $count - 1) as $i) {
+        Storage::disk('public')->put("properties/{$property->id}/{$i}.jpg", 'x');
+        $property->images()->create(['path' => "properties/{$property->id}/{$i}.jpg", 'sort_order' => $i]);
+    }
+
+    return $property;
+}
+
+test('force delete removes every image file when there are several', function () {
+    $property = propertyWithImages(3);
+    $property->delete();
+
+    $this->actingAs($this->admin)
+        ->delete(route('admin.properties.force-delete', $property))
+        ->assertRedirect(route('admin.properties.index', ['trashed' => 'only']));
+
+    expect(PropertyImage::count())->toBe(0);
+    foreach (range(0, 2) as $i) {
+        Storage::disk('public')->assertMissing("properties/{$property->id}/{$i}.jpg");
+    }
+});
+
+test('force delete with enquiries and several images shows an error and keeps everything', function () {
+    $property = propertyWithImages(3);
+    Enquiry::factory()->for($property)->create();
+    $property->delete();
+
+    $this->actingAs($this->admin)
+        ->from(route('admin.properties.show', $property))
+        ->delete(route('admin.properties.force-delete', $property))
+        ->assertRedirect(route('admin.properties.show', $property));
+
+    expect(Property::withTrashed()->find($property->id))->not->toBeNull()
+        ->and($property->images()->count())->toBe(3);
+    foreach (range(0, 2) as $i) {
+        Storage::disk('public')->assertExists("properties/{$property->id}/{$i}.jpg");
+    }
+});
+
+test('update can remove several images at once', function () {
+    $property = propertyWithImages(3);
+    [$first, $second] = $property->images()->take(2)->pluck('id')->all();
+
+    $this->actingAs($this->admin)
+        ->put(route('admin.properties.update', $property), propertyPayload([
+            'agency_id' => $property->agency_id,
+            'remove_images' => [$first, $second],
+        ]))
+        ->assertRedirect(route('admin.properties.show', $property));
+
+    expect($property->images()->count())->toBe(1);
+    Storage::disk('public')->assertMissing("properties/{$property->id}/0.jpg");
+    Storage::disk('public')->assertMissing("properties/{$property->id}/1.jpg");
+    Storage::disk('public')->assertExists("properties/{$property->id}/2.jpg");
+});
