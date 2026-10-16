@@ -1,15 +1,13 @@
 <?php
 
+use App\Http\Middleware\AddSecurityHeaders;
+use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
-
-use App\Http\Middleware\AddSecurityHeaders;
-use App\Http\Middleware\EnsureUserIsAdmin;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function (): void {
+            Route::middleware('web')->group(base_path('routes/public.php'));
+
             Route::middleware(['web', 'auth', 'verified', 'can:access-admin'])
                 ->prefix('admin')
                 ->name('admin.')
@@ -27,7 +27,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
-
 
         // 1. GLOBAL — runs on EVERY request (web + api)
 
@@ -40,9 +39,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // 3. ALIAS — a short name, applied only where you choose
-            $middleware->alias([
-                'admin' => EnsureUserIsAdmin::class,
-            ]);
+        $middleware->alias([
+            'admin' => EnsureUserIsAdmin::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

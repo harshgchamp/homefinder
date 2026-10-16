@@ -73,6 +73,17 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // One file per day for enquiries only (storage/logs/enquiries-YYYY-MM-DD.log),
+        // written by the LogEnquiry listener. A separate channel keeps business
+        // events out of the general error log and lets them be kept longer.
+        'enquiries' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/enquiries.log'),
+            'level' => 'info',
+            'max_files' => 90, // keep 90 days of enquiry logs
+            'replace_placeholders' => true,
+        ],
+
         'monthly' => [
             'driver' => 'monthly',
             'path' => storage_path('logs/laravel.log'),
