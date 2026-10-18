@@ -1,9 +1,11 @@
 <?php
 
+use App\Exceptions\PostcodeLookupUnavailable;
 use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -47,4 +49,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // When postcodes.io is down, every lookup fails. Without this, thousands
+        // of identical errors would flood the log / error tracker (and its bill).
+        // Report at most 10 a minute; the rest are counted, not stored.
+        $exceptions->throttle(fn (Throwable $e) => $e instanceof PostcodeLookupUnavailable
+            ? Limit::perMinute(10)
+            : Limit::none());
     })->create();

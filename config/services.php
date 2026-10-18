@@ -3,6 +3,16 @@
 return [
 
     /*
+    | Postcode lookup (App\Contracts\PostcodeLookup). driver: "postcodes_io" (the
+    | real API) or "fake" (no network; used by the test suite).
+    */
+    'postcodes' => [
+        'driver' => env('POSTCODES_DRIVER', 'postcodes_io'),
+        'base_url' => env('POSTCODES_BASE_URL', 'https://api.postcodes.io'),
+        'timeout' => (int) env('POSTCODES_TIMEOUT', 3),
+    ],
+
+    /*
     |--------------------------------------------------------------------------
     | Third Party Services
     |--------------------------------------------------------------------------
