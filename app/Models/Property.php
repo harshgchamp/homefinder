@@ -202,6 +202,22 @@ class Property extends Model
     // ------------------------------------------------------------------
 
     /**
+     * Only the properties this user may see in the admin area.
+     * Admins: everything. Agents: their agency's. Anyone else: nothing
+     * (agency_id IS NULL matches no property, so the safe default is empty).
+     *
+     * The list-level partner of PropertyPolicy: the policy checks ONE property,
+     * this limits a QUERY. Every admin list, export and bulk action uses it.
+     *
+     * @param  Builder<Property>  $query
+     */
+    #[Scope]
+    protected function visibleTo(Builder $query, User $user): void
+    {
+        $query->when(! $user->is_admin, fn (Builder $q) => $q->where('agency_id', $user->agency_id));
+    }
+
+    /**
      * Apply every filter from the admin list in one call.
      *
      * Why one entry point: the list page and the CSV export must return exactly

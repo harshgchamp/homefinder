@@ -117,8 +117,16 @@ const hideBrokenImage = (event: Event): void => {
 
         <div class="flex gap-2">
             <template v-if="property.is_trashed">
-                <Button variant="outline" @click="restore">Restore</Button>
-                <Button variant="destructive" @click="forceDelete"
+                <Button
+                    v-if="property.can?.restore"
+                    variant="outline"
+                    @click="restore"
+                    >Restore</Button
+                >
+                <Button
+                    v-if="property.can?.forceDelete"
+                    variant="destructive"
+                    @click="forceDelete"
                     >Delete forever</Button
                 >
             </template>
@@ -136,12 +144,13 @@ const hideBrokenImage = (event: Event): void => {
                         >View public page</a
                     >
                 </Button>
-                <Button as-child>
+                <Button v-if="property.can?.update" as-child>
                     <Link :href="route('admin.properties.edit', property.id)"
                         >Edit</Link
                     >
                 </Button>
                 <Button
+                    v-if="property.can?.delete"
                     variant="outline"
                     class="text-destructive"
                     @click="destroy"

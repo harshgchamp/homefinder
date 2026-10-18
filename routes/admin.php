@@ -9,11 +9,23 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', DashboardController::class)->name('dashboard');
 
-// index, create, store, edit, update, destroy. No "show" page for a lookup table.
-Route::resource('features', FeatureController::class)
-    ->except('show')
-    // Rate-limit only the routes that write: 30 requests per minute.
-    ->middlewareFor(['store', 'update', 'destroy'], 'throttle:30,1');
+// The whole admin area allows admins AND agents (can:access-admin in
+// bootstrap/app.php). Features and notifications are site-wide, so admins only.
+Route::middleware('can:manage-site')->group(function (): void {
+    // index, create, store, edit, update, destroy. No "show" page for a lookup table.
+    Route::resource('features', FeatureController::class)
+        ->except('show')
+        // Rate-limit only the routes that write: 30 requests per minute.
+        ->middlewareFor(['store', 'update', 'destroy'], 'throttle:30,1');
+
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    // {id} is a UUID string (notifications use UUID primary keys), so whereUuid()
+    // rejects anything else before the controller runs.
+    Route::post('notifications/{id}/read', [NotificationController::class, 'read'])
+        ->whereUuid('id')
+        ->name('notifications.read');
+});
 
 // --- Properties ---------------------------------------------------------
 
@@ -41,13 +53,3 @@ Route::resource('properties', PropertyController::class)
     // Only "show" can open a trashed property; edit/update/destroy still 404 for it.
     ->withTrashed(['show'])
     ->middlewareFor(['store', 'update', 'destroy'], 'throttle:30,1');
-
-// --- Notifications --------------------------------------------------------
-
-Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
-Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
-// {id} is a UUID string (notifications use UUID primary keys), so whereUuid()
-// rejects anything else before the controller runs.
-Route::post('notifications/{id}/read', [NotificationController::class, 'read'])
-    ->whereUuid('id')
-    ->name('notifications.read');

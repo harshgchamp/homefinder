@@ -1,15 +1,26 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const page = usePage();
 
-const links = [
-    { title: 'Dashboard', href: '/admin' },
-    { title: 'Properties', href: '/admin/properties' },
-    { title: 'Features', href: '/admin/features' },
-    { title: 'Notifications', href: '/admin/notifications' },
-    // Property types, Agencies: added in the next steps
-];
+// Why computed + adminOnly: agents use the admin area too, but features and
+// notifications are site-wide (the "manage-site" gate), so their links are hidden.
+const isAdmin = computed(() => page.props.auth.user?.is_admin === true);
+
+const links = computed(() =>
+    [
+        { title: 'Dashboard', href: '/admin', adminOnly: false },
+        { title: 'Properties', href: '/admin/properties', adminOnly: false },
+        { title: 'Features', href: '/admin/features', adminOnly: true },
+        {
+            title: 'Notifications',
+            href: '/admin/notifications',
+            adminOnly: true,
+        },
+        // Property types, Agencies: added in the next steps
+    ].filter((link) => !link.adminOnly || isAdmin.value),
+);
 
 // Why: /admin/features/create and /admin/features/5/edit should also highlight "Features".
 // The dashboard link is matched exactly, otherwise it would be active on every admin page.

@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -26,6 +27,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string|null $two_factor_recovery_codes
  * @property Carbon|null $two_factor_confirmed_at
  * @property string|null $remember_token
+ * @property bool $is_admin
+ * @property int|null $agency_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -41,6 +44,10 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
      */
     protected $attributes = [
         'is_admin' => false,
+        // Default so a new User object always has the key. Without it, strict
+        // mode throws when isAgent() reads agency_id on a model created in
+        // memory (e.g. by a factory) before it is re-read from the database.
+        'agency_id' => null,
     ];
 
     /**
@@ -56,6 +63,25 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'two_factor_confirmed_at' => 'datetime',
             'is_admin' => 'boolean',
         ];
+    }
+
+    /**
+     * The agency an AGENT works for. Null for normal users and admins.
+     *
+     * @return BelongsTo<Agency, $this>
+     */
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    /**
+     * An agent manages one agency's properties in the admin area.
+     * Admins are not agents: they can do everything (PropertyPolicy::before()).
+     */
+    public function isAgent(): bool
+    {
+        return ! $this->is_admin && $this->agency_id !== null;
     }
 
     /**

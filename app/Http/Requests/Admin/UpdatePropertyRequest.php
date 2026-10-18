@@ -15,6 +15,14 @@ use Illuminate\Validation\Validator;
 class UpdatePropertyRequest extends StorePropertyRequest
 {
     /**
+     * PropertyPolicy::update() for the property in the URL.
+     */
+    public function authorize(): bool
+    {
+        return $this->user()?->can('update', $this->property()) ?? false;
+    }
+
+    /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -30,6 +38,7 @@ class UpdatePropertyRequest extends StorePropertyRequest
                 Rule::exists('agencies', 'id')->where(fn ($query) => $query->where(
                     fn ($q) => $q->where('is_active', true)->orWhere('id', $this->property()->agency_id),
                 )),
+                ...$this->ownAgencyOnly(),
             ],
 
             'remove_images' => ['nullable', 'array'],

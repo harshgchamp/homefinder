@@ -71,6 +71,13 @@ export type Property = {
     features?: { id: number; name: string }[];
     images?: PropertyImage[];
     main_image_url?: string | null;
+    // From PropertyPolicy, for the logged-in user (absent for guests).
+    can?: {
+        update: boolean;
+        delete: boolean;
+        restore: boolean;
+        forceDelete: boolean;
+    };
     enquiries_count?: number;
     favourites_count?: number;
 };

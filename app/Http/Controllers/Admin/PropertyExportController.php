@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PropertyIndexRequest;
 use App\Models\Property;
+use App\Models\User;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -25,7 +26,11 @@ class PropertyExportController extends Controller
     public function __invoke(PropertyIndexRequest $request): StreamedResponse
     {
         // The same filter() scope as the list page, so the CSV matches what the admin sees.
+        /** @var User $user */
+        $user = $request->user();
+
         $query = Property::query()
+            ->visibleTo($user) // agents export only their agency's listings
             ->with(['agency:id,name', 'propertyType:id,name']) // eager loaded per chunk of 500
             ->filter($request->filters());
 

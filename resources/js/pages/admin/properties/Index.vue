@@ -435,13 +435,16 @@ const hideBrokenImage = (event: Event): void => {
                     </td>
                     <td class="px-4 py-2 text-right whitespace-nowrap">
                         <template v-if="property.is_trashed">
+                            <!-- Buttons follow PropertyPolicy via property.can -->
                             <Button
+                                v-if="property.can?.restore"
                                 variant="ghost"
                                 size="sm"
                                 @click="restore(property)"
                                 >Restore</Button
                             >
                             <Button
+                                v-if="property.can?.forceDelete"
                                 variant="ghost"
                                 size="sm"
                                 class="text-destructive"
@@ -450,7 +453,12 @@ const hideBrokenImage = (event: Event): void => {
                             >
                         </template>
                         <template v-else>
-                            <Button variant="ghost" size="sm" as-child>
+                            <Button
+                                v-if="property.can?.update"
+                                variant="ghost"
+                                size="sm"
+                                as-child
+                            >
                                 <Link
                                     :href="
                                         route(
@@ -462,6 +470,7 @@ const hideBrokenImage = (event: Event): void => {
                                 >
                             </Button>
                             <Button
+                                v-if="property.can?.delete"
                                 variant="ghost"
                                 size="sm"
                                 class="text-destructive"
