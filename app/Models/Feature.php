@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsLookupCache;
+use App\Support\CachedLookups;
 use Carbon\CarbonImmutable;
 use Database\Factories\FeatureFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -23,7 +25,7 @@ use Illuminate\Support\Str;
 class Feature extends Model
 {
     /** @use HasFactory<FeatureFactory> */
-    use HasFactory;
+    use ClearsLookupCache, HasFactory;
 
     /**
      * How long a feature counts as "new" in the admin list.
@@ -81,5 +83,13 @@ class Feature extends Model
     public function properties(): BelongsToMany
     {
         return $this->belongsToMany(Property::class);
+    }
+
+    /**
+     * Saving or deleting a feature clears this cached dropdown list.
+     */
+    public static function lookupCacheKey(): string
+    {
+        return CachedLookups::FEATURES;
     }
 }

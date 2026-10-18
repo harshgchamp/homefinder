@@ -10,13 +10,11 @@ use App\Http\Requests\Admin\PropertyIndexRequest;
 use App\Http\Requests\Admin\StorePropertyRequest;
 use App\Http\Requests\Admin\UpdatePropertyRequest;
 use App\Http\Resources\PropertyResource;
-use App\Models\Agency;
 use App\Models\Enquiry;
-use App\Models\Feature;
 use App\Models\Property;
-use App\Models\PropertyType;
 use App\Models\User;
 use App\Services\PropertyService;
+use App\Support\CachedLookups;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -279,14 +277,17 @@ class PropertyController extends Controller
     private function formOptions(): array
     {
         return [
-            // Agents can only pick their own agency (StorePropertyRequest enforces it too).
-            'agencies' => $this->toOptions(Agency::query()
-                ->where('is_active', true)
-                ->when($this->currentUser()->isAgent(), fn ($q) => $q->whereKey($this->currentUser()->agency_id))
-                ->orderBy('name')
-                ->get(['id', 'name'])),
-            'types' => $this->toOptions(PropertyType::query()->orderBy('name')->get(['id', 'name'])),
-            'features' => $this->toOptions(Feature::query()->orderBy('name')->get(['id', 'name'])),
+            // Read from the cache (CachedLookups), not the database, on every page.
+            // The cached list is the same for everyone; an agent's view is then
+            // narrowed in PHP to their own agency (StorePropertyRequest enforces it too).
+            'agencies' => $this->currentUser()->isAgent()
+                ? array_values(array_filter(
+                    CachedLookups::agencies(),
+                    fn (array $option): bool => $option['value'] === $this->currentUser()->agency_id,
+                ))
+                : CachedLookups::agencies(),
+            'types' => CachedLookups::propertyTypes(),
+            'features' => CachedLookups::features(),
             'listingTypes' => ListingType::options(),
             'statuses' => PropertyStatus::options(),
 
@@ -300,19 +301,6 @@ class PropertyController extends Controller
                 ),
             ]),
         ];
-    }
-
-    /**
-     * Turn models into [{ value: 1, label: 'Foxtons' }, ...] for select boxes.
-     *
-     * @param  Collection<int, Agency>|Collection<int, PropertyType>|Collection<int, Feature>  $models
-     * @return Collection<int, array{value: int, label: string}>
-     */
-    private function toOptions(Collection $models): Collection
-    {
-        return $models
-            ->map(fn (Agency|PropertyType|Feature $model): array => ['value' => $model->id, 'label' => $model->name])
-            ->values();
     }
 
     /**
