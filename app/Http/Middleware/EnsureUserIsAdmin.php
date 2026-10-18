@@ -23,6 +23,4 @@ class EnsureUserIsAdmin
         // AFTER the controller (optional)
         return $response;
     }
-
-     
 }

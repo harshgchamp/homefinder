@@ -13,12 +13,12 @@ HomeFinder is developed on a Windows machine. The app needs PHP 8.5, MySQL, Redi
 
 Sail starts four containers, defined in `compose.yaml`:
 
-| Service | Image | Host port | Override in `.env` |
-|---|---|---|---|
-| App (PHP 8.5) | `sail-8.5/app` | 80 | `APP_PORT` |
-| Vite dev server | (same container) | 5173 | `VITE_PORT` |
-| MySQL | `mysql:8.4` | 3306 | `FORWARD_DB_PORT` |
-| Redis | `redis:alpine` | 6379 | `FORWARD_REDIS_PORT` |
+| Service                  | Image             | Host port   | Override in `.env`                                        |
+| ------------------------ | ----------------- | ----------- | --------------------------------------------------------- |
+| App (PHP 8.5)            | `sail-8.5/app`    | 80          | `APP_PORT`                                                |
+| Vite dev server          | (same container)  | 5173        | `VITE_PORT`                                               |
+| MySQL                    | `mysql:8.4`       | 3306        | `FORWARD_DB_PORT`                                         |
+| Redis                    | `redis:alpine`    | 6379        | `FORWARD_REDIS_PORT`                                      |
 | Mailpit SMTP / dashboard | `axllent/mailpit` | 1025 / 8025 | `FORWARD_MAILPIT_PORT` / `FORWARD_MAILPIT_DASHBOARD_PORT` |
 
 Inside the containers the app reaches the others by service name (`DB_HOST=mysql`, `REDIS_HOST=redis`). Those names only resolve inside the Docker network.
@@ -28,6 +28,7 @@ Inside the containers the app reaches the others by service name (`DB_HOST=mysql
 ## The cmslaravel conflict lesson
 
 <!-- TODO(harsh): replace this paragraph with what actually happened. -->
+
 Every Sail project binds the same default host ports (80, 3306, 6379, 5173, 1025, 8025). Two projects cannot be up at once on the defaults: the second one fails to start, or a tool such as DBeaver ends up talking to the other project's database. The rule from now on: run `sail down` in the other project before `sail up` here, or give this project its own ports with the `.env` overrides in the table above.
 
 ## Consequences
