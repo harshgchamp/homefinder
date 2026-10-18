@@ -1,17 +1,18 @@
 # HomeFinder
 
 <!-- TODO(harsh): confirm this one-line purpose. -->
+
 HomeFinder is a web application for searching and shortlisting homes. It is at the foundation stage: authentication, account settings and the application shell are in place, and the property features are still to be built.
 
 ## Stack
 
-| Layer | Choice |
-|---|---|
-| Backend | Laravel 13 on PHP 8.5, Fortify for auth (two-factor and passkeys) |
-| Frontend | Vue 3, Inertia 3, TypeScript, Tailwind 4, shadcn-vue |
-| Data | MySQL 8.4, Redis |
-| Local environment | Laravel Sail (Docker) on WSL2, Mailpit for mail |
-| Quality | Pest 4, Larastan (PHPStan level 7), Pint |
+| Layer             | Choice                                                            |
+| ----------------- | ----------------------------------------------------------------- |
+| Backend           | Laravel 13 on PHP 8.5, Fortify for auth (two-factor and passkeys) |
+| Frontend          | Vue 3, Inertia 3, TypeScript, Tailwind 4, shadcn-vue              |
+| Data              | MySQL 8.4, Redis                                                  |
+| Local environment | Laravel Sail (Docker) on WSL2, Mailpit for mail                   |
+| Quality           | Pest 4, Larastan (PHPStan level 7), Pint                          |
 
 The reasons behind these choices are recorded in [docs/adr](docs/adr):
 
@@ -67,10 +68,10 @@ MAIL_PORT=1025
 ./vendor/bin/sail down         # stop
 ```
 
-| What | Where |
-|---|---|
-| Application | http://localhost |
-| Mailpit inbox | http://localhost:8025 |
+| What                 | Where                                             |
+| -------------------- | ------------------------------------------------- |
+| Application          | http://localhost                                  |
+| Mailpit inbox        | http://localhost:8025                             |
 | MySQL (DBeaver etc.) | `127.0.0.1:3306`, database `laravel`, user `sail` |
 
 Sail binds ports 80, 3306, 6379, 5173, 1025 and 8025. If another Sail project is running, stop it first or change the ports in `.env` (`APP_PORT`, `FORWARD_DB_PORT` and so on); see ADR-0001.
