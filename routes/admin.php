@@ -15,8 +15,8 @@ Route::middleware('can:manage-site')->group(function (): void {
     // index, create, store, edit, update, destroy. No "show" page for a lookup table.
     Route::resource('features', FeatureController::class)
         ->except('show')
-        // Rate-limit only the routes that write: 30 requests per minute.
-        ->middlewareFor(['store', 'update', 'destroy'], 'throttle:30,1');
+        // Rate-limit only the routes that write (named limiter in AppServiceProvider).
+        ->middlewareFor(['store', 'update', 'destroy'], 'throttle:admin-writes');
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
@@ -32,11 +32,11 @@ Route::middleware('can:manage-site')->group(function (): void {
 // Extra routes go BEFORE Route::resource. Otherwise GET /properties/export
 // would match the resource's GET /properties/{property} with {property} = "export".
 Route::get('properties/export', PropertyExportController::class)
-    ->middleware('throttle:10,1') // exports are heavy; 10 per minute
+    ->middleware('throttle:exports') // exports are heavy; see the named limiter
     ->name('properties.export');
 
 Route::post('properties/bulk', [PropertyController::class, 'bulk'])
-    ->middleware('throttle:30,1')
+    ->middleware('throttle:admin-writes')
     ->name('properties.bulk');
 
 // withTrashed(): route model binding normally ignores soft-deleted rows (404).
@@ -52,4 +52,4 @@ Route::delete('properties/{property}/force', [PropertyController::class, 'forceD
 Route::resource('properties', PropertyController::class)
     // Only "show" can open a trashed property; edit/update/destroy still 404 for it.
     ->withTrashed(['show'])
-    ->middlewareFor(['store', 'update', 'destroy'], 'throttle:30,1');
+    ->middlewareFor(['store', 'update', 'destroy'], 'throttle:admin-writes');

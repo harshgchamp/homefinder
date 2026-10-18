@@ -19,6 +19,7 @@ Route::get('properties/{property:slug}', [PropertyController::class, 'show'])
 
 Route::post('properties/{property:slug}/enquiries', [EnquiryController::class, 'store'])
     // auth: must be logged in. verified: email confirmed, so the agency can reply.
-    // throttle:5,1: at most 5 enquiries a minute per user, against bots.
-    ->middleware(['auth', 'verified', 'throttle:5,1'])
+    // throttle:enquiries: the named limiter in AppServiceProvider
+    // (5 a minute and 20 a day per user, with a friendly error message).
+    ->middleware(['auth', 'verified', 'throttle:enquiries'])
     ->name('properties.enquiries.store');
