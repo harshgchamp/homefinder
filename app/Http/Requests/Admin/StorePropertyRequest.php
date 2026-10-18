@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Contracts\PostcodeLookup;
 use App\Enums\ListingType;
 use App\Enums\PropertyStatus;
+use App\Exceptions\PostcodeLookupUnavailable;
+use App\Exceptions\PostcodeNotFound;
 use App\Models\Property;
 use App\Rules\UkPostcode;
 use Closure;
@@ -95,13 +98,33 @@ class StorePropertyRequest extends FormRequest
     }
 
     /**
-     * Checks that need more than one field. These run after the rules above.
+     * Checks that need more than one field, or an outside service. These run
+     * after the rules above.
+     *
+     * PostcodeLookup is injected: Laravel calls after() through the service
+     * container, so any type-hinted dependency is resolved for us.
      *
      * @return array<int, Closure(Validator): void>
      */
-    public function after(): array
+    public function after(PostcodeLookup $postcodes): array
     {
         return [
+            // Does the postcode really exist? UkPostcode only checked its FORMAT.
+            function (Validator $validator) use ($postcodes): void {
+                if ($validator->errors()->has('postcode')) {
+                    return;
+                }
+
+                try {
+                    $postcodes->lookup($this->string('postcode')->value());
+                } catch (PostcodeNotFound) {
+                    $validator->errors()->add('postcode', 'We couldn\'t find this postcode. Please check it.');
+                } catch (PostcodeLookupUnavailable) {
+                    // Graceful degradation: the provider is down, so do not block the
+                    // admin. Saving continues; GeocodeProperty retries the lookup later.
+                }
+            },
+
             function (Validator $validator): void {
                 // Skip if listing_type or status already failed: the enums below would be null.
                 if ($validator->errors()->hasAny(['listing_type', 'status'])) {

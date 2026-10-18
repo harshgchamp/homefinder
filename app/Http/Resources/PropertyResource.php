@@ -49,6 +49,10 @@ class PropertyResource extends JsonResource
             'furnished' => $this->whenHas('furnished'),
 
             'address_line_1' => $this->whenHas('address_line_1'),
+            // Filled in by the GeocodeProperty job; null until it has run.
+            'location' => $this->whenHas('latitude', fn () => $this->latitude !== null && $this->longitude !== null
+                ? ['latitude' => $this->latitude, 'longitude' => $this->longitude]
+                : null),
             'city' => $this->city,
             'postcode' => $this->postcode,
 

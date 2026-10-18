@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\PostcodeLookup;
 use App\Models\User;
+use App\Services\Postcodes\CachedPostcodeLookup;
+use App\Services\Postcodes\FakePostcodeLookup;
+use App\Services\Postcodes\PostcodesIoLookup;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -24,7 +29,41 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->registerPostcodeLookup();
+    }
+
+    /**
+     * The service container: "when something asks for X, give it Y".
+     *
+     * Classes type-hint the INTERFACE (PostcodeLookup). Without a binding the
+     * container could not build it: an interface cannot be instantiated. These
+     * bindings answer "which class, built how?" in one place.
+     */
+    protected function registerPostcodeLookup(): void
+    {
+        // 1. Contextual binding of PRIMITIVES. PostcodesIoLookup's constructor
+        //    wants a string $baseUrl and an int $timeout. Type hints cannot say
+        //    which string, so tell the container: for THIS class, take them
+        //    from config. Now app(PostcodesIoLookup::class) just works.
+        $this->app->when(PostcodesIoLookup::class)
+            ->needs('$baseUrl')
+            ->giveConfig('services.postcodes.base_url');
+
+        $this->app->when(PostcodesIoLookup::class)
+            ->needs('$timeout')
+            ->giveConfig('services.postcodes.timeout');
+
+        // 2. Bind the INTERFACE to an implementation, chosen by config.
+        //    singleton(): build it once per request/process and reuse it
+        //    (bind() would build a new one every time it is asked for).
+        $this->app->singleton(PostcodeLookup::class, fn (Application $app): PostcodeLookup => match (config('services.postcodes.driver')) {
+            'fake' => $app->make(FakePostcodeLookup::class),
+            default => $app->make(PostcodesIoLookup::class),
+        });
+
+        // 3. extend(): wrap whatever was bound in a decorator. Every caller now
+        //    gets CachedPostcodeLookup(real or fake) without knowing it.
+        $this->app->extend(PostcodeLookup::class, fn (PostcodeLookup $lookup): PostcodeLookup => new CachedPostcodeLookup($lookup));
     }
 
     /**

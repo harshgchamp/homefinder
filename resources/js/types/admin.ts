@@ -57,6 +57,7 @@ export type Property = {
     bathrooms: number;
     furnished?: boolean | null;
     address_line_1?: string;
+    location?: { latitude: number; longitude: number } | null;
     city: string;
     postcode: string;
     published_at: string | null;

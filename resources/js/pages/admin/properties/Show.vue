@@ -58,6 +58,13 @@ const details = computed(() => [
         label: 'Address',
         value: `${props.property.address_line_1}, ${props.property.city} ${props.property.postcode}`,
     },
+    // Filled in by the GeocodeProperty job (postcode -> coordinates)
+    {
+        label: 'Map position',
+        value: props.property.location
+            ? `${props.property.location.latitude}, ${props.property.location.longitude}`
+            : 'Not found yet',
+    },
     { label: 'Slug', value: props.property.slug },
     { label: 'Published', value: props.property.published_at ?? '—' },
     // Set by the RecordLastEnquiryOnProperty listener
