@@ -4,10 +4,12 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\ListingType;
 use App\Enums\PropertyStatus;
+use App\Models\Property;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\In;
 use Illuminate\Validation\Validator;
 
 class StorePropertyRequest extends FormRequest
@@ -18,11 +20,11 @@ class StorePropertyRequest extends FormRequest
     public const MAX_IMAGES = 10;
 
     /**
-     * Second line of defence: the route group already checks this gate.
+     * PropertyPolicy::create(): admins and agents.
      */
     public function authorize(): bool
     {
-        return $this->user()?->can('access-admin') ?? false;
+        return $this->user()?->can('create', Property::class) ?? false;
     }
 
     /**
@@ -44,7 +46,7 @@ class StorePropertyRequest extends FormRequest
         return [
             // exists: the id must be a real row, otherwise the foreign key would
             // fail with a database error instead of a friendly message.
-            'agency_id' => ['required', 'integer', Rule::exists('agencies', 'id')->where('is_active', true)],
+            'agency_id' => ['required', 'integer', Rule::exists('agencies', 'id')->where('is_active', true), ...$this->ownAgencyOnly()],
             'property_type_id' => ['required', 'integer', Rule::exists('property_types', 'id')],
 
             'title' => ['required', 'string', 'min:5', 'max:255'],
@@ -76,6 +78,19 @@ class StorePropertyRequest extends FormRequest
             // real file content, not only the extension in the file name.
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ];
+    }
+
+    /**
+     * Agents may only list properties for the agency they work for.
+     * The policy says "agents may create"; this says "...but only for themselves".
+     *
+     * @return list<In>
+     */
+    protected function ownAgencyOnly(): array
+    {
+        $user = $this->user();
+
+        return $user !== null && $user->isAgent() ? [Rule::in([$user->agency_id])] : [];
     }
 
     /**

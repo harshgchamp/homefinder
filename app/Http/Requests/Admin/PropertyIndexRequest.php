@@ -17,9 +17,13 @@ use Illuminate\Validation\Rule;
  */
 class PropertyIndexRequest extends FormRequest
 {
+    /**
+     * PropertyPolicy::viewAny(). Passing the CLASS (no model exists yet) tells
+     * Laravel which policy to use.
+     */
     public function authorize(): bool
     {
-        return $this->user()?->can('access-admin') ?? false;
+        return $this->user()?->can('viewAny', Property::class) ?? false;
     }
 
     /**

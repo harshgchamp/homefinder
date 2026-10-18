@@ -36,7 +36,14 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureDefaults(): void
     {
-        Gate::define('access-admin', fn (User $user): bool => $user->is_admin);
+        // Gates: simple yes/no checks that are not about one model.
+        // (Rules about a specific model live in policies, e.g. PropertyPolicy.)
+
+        // Enter the admin area at all: admins and agents.
+        Gate::define('access-admin', fn (User $user): bool => $user->is_admin || $user->isAgent());
+
+        // Site-wide settings (features list, admin notifications): admins only.
+        Gate::define('manage-site', fn (User $user): bool => $user->is_admin);
 
         Date::use(CarbonImmutable::class);
 

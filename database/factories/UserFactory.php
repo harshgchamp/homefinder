@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Agency;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -54,6 +55,17 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_admin' => true,
+        ]);
+    }
+
+    /**
+     * An agent working for the given agency (a new one if none is given).
+     */
+    public function agent(?Agency $agency = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => false,
+            'agency_id' => $agency ?? Agency::factory(),
         ]);
     }
 

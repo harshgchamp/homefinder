@@ -15,12 +15,14 @@ use App\Models\Enquiry;
 use App\Models\Feature;
 use App\Models\Property;
 use App\Models\PropertyType;
+use App\Models\User;
 use App\Services\PropertyService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -52,6 +54,9 @@ class PropertyController extends Controller
         $filters = $request->filters();
 
         $properties = Property::query()
+            // Agents see only their agency's properties (PropertyIndexRequest
+            // already checked PropertyPolicy::viewAny for the page itself).
+            ->visibleTo($this->currentUser())
             ->select(self::LIST_COLUMNS)
             // Eager loading: 3 extra queries for the whole page instead of
             // 3 per row (the N+1 problem). "agency:id,name" also limits the columns.
@@ -76,6 +81,9 @@ class PropertyController extends Controller
 
     public function create(): Response
     {
+        // No model yet, so pass the class: PropertyPolicy::create().
+        Gate::authorize('create', Property::class);
+
         return Inertia::render('admin/properties/Create', [
             'options' => $this->formOptions(),
         ]);
@@ -98,6 +106,9 @@ class PropertyController extends Controller
      */
     public function show(Property $property): Response
     {
+        // Gate::authorize(): calls PropertyPolicy::view(); false -> 403 Forbidden.
+        Gate::authorize('view', $property);
+
         // load() eager loads on a model you already have. One query per relation.
         $property->load(['agency:id,name', 'propertyType:id,name', 'features:id,name', 'images'])
             ->loadCount(['enquiries', 'favouritedBy']);
@@ -127,6 +138,8 @@ class PropertyController extends Controller
 
     public function edit(Property $property): Response
     {
+        Gate::authorize('update', $property);
+
         // features:id,name: PropertyResource reads the name. With shouldBeStrict(),
         // reading a column that was not selected throws instead of returning null.
         $property->load(['features:id,name', 'images']);
@@ -159,6 +172,8 @@ class PropertyController extends Controller
      */
     public function destroy(Property $property): RedirectResponse
     {
+        Gate::authorize('delete', $property);
+
         $this->properties->delete($property);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "\"{$property->title}\" moved to the trash."]);
@@ -168,6 +183,8 @@ class PropertyController extends Controller
 
     public function restore(Property $property): RedirectResponse
     {
+        Gate::authorize('restore', $property);
+
         $this->properties->restore($property);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "\"{$property->title}\" restored."]);
@@ -180,6 +197,9 @@ class PropertyController extends Controller
      */
     public function forceDelete(Property $property): RedirectResponse
     {
+        // Agents never pass this (forceDelete() returns false); only admins via before().
+        Gate::authorize('forceDelete', $property);
+
         // 409 Conflict: the request is valid, but not in the property's current state.
         abort_unless($property->trashed(), 409, 'Move the property to the trash first.');
 
@@ -214,7 +234,13 @@ class PropertyController extends Controller
             'ids.*' => ['integer'],
         ]);
 
-        $count = $this->properties->bulk($data['action'], $data['ids']);
+        // Keep only ids this user may see. Without this, an agent could post
+        // another agency's ids and publish or trash their listings: the policy
+        // only checks one model, so a bulk action must filter the list itself.
+        /** @var list<int> $ids */
+        $ids = Property::query()->visibleTo($this->currentUser())->whereKey($data['ids'])->pluck('id')->all();
+
+        $count = $this->properties->bulk($data['action'], $ids);
 
         $verb = ['publish' => 'published', 'unpublish' => 'unpublished', 'delete' => 'moved to the trash'][$data['action']];
 
@@ -241,7 +267,7 @@ class PropertyController extends Controller
             ...$this->formOptions(),
             'publications' => PublicationStatus::options(),
             // distinct()->pluck(): one column of unique values, as a Collection of strings.
-            'cities' => Property::query()->distinct()->orderBy('city')->pluck('city'),
+            'cities' => Property::query()->visibleTo($this->currentUser())->distinct()->orderBy('city')->pluck('city'),
         ];
     }
 
@@ -253,7 +279,12 @@ class PropertyController extends Controller
     private function formOptions(): array
     {
         return [
-            'agencies' => $this->toOptions(Agency::query()->where('is_active', true)->orderBy('name')->get(['id', 'name'])),
+            // Agents can only pick their own agency (StorePropertyRequest enforces it too).
+            'agencies' => $this->toOptions(Agency::query()
+                ->where('is_active', true)
+                ->when($this->currentUser()->isAgent(), fn ($q) => $q->whereKey($this->currentUser()->agency_id))
+                ->orderBy('name')
+                ->get(['id', 'name'])),
             'types' => $this->toOptions(PropertyType::query()->orderBy('name')->get(['id', 'name'])),
             'features' => $this->toOptions(Feature::query()->orderBy('name')->get(['id', 'name'])),
             'listingTypes' => ListingType::options(),
@@ -310,6 +341,15 @@ class PropertyController extends Controller
             ]);
 
         return array_values($months->all());
+    }
+
+    /**
+     * The logged-in admin or agent (the route group guarantees one exists).
+     */
+    private function currentUser(): User
+    {
+        /** @var User */
+        return request()->user();
     }
 
     /**

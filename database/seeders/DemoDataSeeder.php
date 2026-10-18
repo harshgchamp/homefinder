@@ -46,6 +46,13 @@ class DemoDataSeeder extends Seeder
             $base->count(1)->scheduled()->create();
         });
 
+        // An agent for the first agency, to try the agent role (PropertyPolicy).
+        // Log in as agent@example.com / password: only that agency's listings show.
+        User::factory()->agent(Agency::query()->orderBy('id')->firstOrFail())->create([
+            'name' => 'Demo Agent',
+            'email' => 'agent@example.com',
+        ]);
+
         Property::all()->each(function (Property $property) use ($features): void {
             $property->features()->attach(
                 $features->random(fake()->numberBetween(1, 4))->pluck('id')

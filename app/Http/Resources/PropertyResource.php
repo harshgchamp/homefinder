@@ -77,6 +77,16 @@ class PropertyResource extends JsonResource
             'images' => PropertyImageResource::collection($this->whenLoaded('images')),
             'main_image_url' => $this->whenLoaded('mainImage', fn () => $this->mainImage?->url),
 
+            // What the CURRENT user may do with this property, so the page only
+            // shows buttons that will work. The server still checks every action;
+            // hiding a button is for usability, not security.
+            'can' => $this->when($request->user() !== null, fn (): array => [
+                'update' => (bool) $request->user()?->can('update', $this->resource),
+                'delete' => (bool) $request->user()?->can('delete', $this->resource),
+                'restore' => (bool) $request->user()?->can('restore', $this->resource),
+                'forceDelete' => (bool) $request->user()?->can('forceDelete', $this->resource),
+            ]),
+
             'enquiries_count' => $this->whenCounted('enquiries'),
             'favourites_count' => $this->whenCounted('favouritedBy'),
         ];

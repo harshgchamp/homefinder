@@ -21,7 +21,8 @@ import type { NavItem } from '@/types';
 
 const page = usePage();
 
-const isAdmin = computed(() => page.props.auth.user?.is_admin === true);
+// From the server's access-admin gate: admins and agents.
+const isAdmin = computed(() => page.props.auth.canAccessAdmin === true);
 
 const mainNavItems: NavItem[] = [
     {

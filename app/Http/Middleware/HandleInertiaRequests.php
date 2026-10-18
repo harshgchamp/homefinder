@@ -40,6 +40,9 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+                // Decided by the same "access-admin" gate the routes use, so Vue
+                // never re-implements the rule (admins and agents both get true).
+                'canAccessAdmin' => $request->user()?->can('access-admin') ?? false,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             // The badge in the admin menu. A closure, so the COUNT query only runs
