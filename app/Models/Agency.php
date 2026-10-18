@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsLookupCache;
+use App\Support\CachedLookups;
 use Database\Factories\AgencyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +20,7 @@ class Agency extends Model
      *
      * @use HasFactory<AgencyFactory>
      */
-    use HasFactory, Notifiable;
+    use ClearsLookupCache, HasFactory, Notifiable;
 
     protected $fillable = ['name', 'slug', 'email', 'phone', 'logo_path', 'is_active'];
 
@@ -56,5 +58,13 @@ class Agency extends Model
     public function enquiries(): HasManyThrough
     {
         return $this->hasManyThrough(Enquiry::class, Property::class);
+    }
+
+    /**
+     * Saving or deleting an agency clears this cached dropdown list.
+     */
+    public static function lookupCacheKey(): string
+    {
+        return CachedLookups::AGENCIES;
     }
 }

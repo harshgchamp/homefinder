@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Support\CachedLookups;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -25,5 +26,9 @@ class DatabaseSeeder extends Seeder
         if (! app()->isProduction()) {
             $this->call(DemoDataSeeder::class);
         }
+
+        // WithoutModelEvents (above) means the models' cache-clearing events did
+        // not run, so clear the cached dropdown lists by hand.
+        CachedLookups::forgetAll();
     }
 }
