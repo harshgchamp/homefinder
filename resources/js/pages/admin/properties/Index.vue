@@ -73,7 +73,7 @@ const sortLabels: Record<string, string> = {
     oldest: 'Oldest first',
     price_asc: 'Price: low to high',
     price_desc: 'Price: high to low',
-    title: 'Title A–Z',
+    title: 'Title A-Z',
 };
 const sortOptions = computed(() =>
     props.sorts.map((value) => ({
