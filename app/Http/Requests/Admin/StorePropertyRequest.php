@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Enums\ListingType;
 use App\Enums\PropertyStatus;
 use App\Models\Property;
+use App\Rules\UkPostcode;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -64,7 +65,7 @@ class StorePropertyRequest extends FormRequest
 
             'address_line_1' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:100'],
-            'postcode' => ['required', 'string', 'max:10'],
+            'postcode' => ['required', 'string', 'max:10', new UkPostcode],
 
             // Empty = draft, past = published, future = scheduled.
             'published_at' => ['nullable', 'date'],

@@ -38,7 +38,8 @@ class PropertyFactory extends Factory
             'furnished' => null,
             'address_line_1' => fake()->buildingNumber().' '.fake()->streetName(),
             'city' => fake()->randomElement(['Romford', 'Ilford', 'Barking', 'Chelmsford', 'London']),
-            'postcode' => fake()->postcode(),
+            // en_GB: real UK postcode formats (the app's default faker locale is en_US).
+            'postcode' => fake('en_GB')->postcode(),
             'status' => PropertyStatus::Available,
             'published_at' => null,
         ];
