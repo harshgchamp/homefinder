@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Contracts\PostcodeLookup;
 use App\Models\Property;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -56,10 +57,10 @@ class UpdatePropertyRequest extends StorePropertyRequest
      *
      * @return array<int, Closure(Validator): void>
      */
-    public function after(): array
+    public function after(PostcodeLookup $postcodes): array
     {
         return [
-            ...parent::after(),
+            ...parent::after($postcodes),
 
             function (Validator $validator): void {
                 $total = $this->property()->images()->count()

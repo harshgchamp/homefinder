@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\GeocodeProperty;
 use App\Jobs\OptimisePropertyImage;
 use App\Models\Property;
 use App\Models\PropertyImage;
@@ -38,6 +39,9 @@ class PropertyService
             return DB::transaction(function () use ($data, $images, &$storedPaths): Property {
                 $property = Property::create(Arr::except($data, self::NON_COLUMN_KEYS));
 
+                // Map position from the postcode, in the background (third-party API).
+                GeocodeProperty::dispatch($property)->afterCommit();
+
                 // sync(): make the pivot rows EXACTLY this list of ids.
                 $property->features()->sync($this->featureIds($data));
 
@@ -60,6 +64,11 @@ class PropertyService
         return $this->withUploadedFiles(function (array &$storedPaths) use ($property, $data, $newImages, $removeImageIds): Property {
             return DB::transaction(function () use ($property, $data, $newImages, $removeImageIds, &$storedPaths): Property {
                 $property->update(Arr::except($data, self::NON_COLUMN_KEYS));
+
+                // Only look the postcode up again if it actually changed.
+                if ($property->wasChanged('postcode')) {
+                    GeocodeProperty::dispatch($property)->afterCommit();
+                }
 
                 // sync() works out the difference itself: it detaches features
                 // that were unticked and attaches new ones, leaving the rest alone.

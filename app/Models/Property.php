@@ -39,6 +39,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $postcode
  * @property CarbonImmutable|null $published_at
  * @property CarbonImmutable|null $last_enquiry_at
+ * @property float|null $latitude
+ * @property float|null $longitude
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  * @property CarbonImmutable|null $deleted_at
@@ -132,6 +134,9 @@ class Property extends Model
             'furnished' => 'boolean',
             'published_at' => 'datetime',
             'last_enquiry_at' => 'datetime',
+            // decimal columns come back from MySQL as strings; cast to numbers.
+            'latitude' => 'float',
+            'longitude' => 'float',
         ];
     }
 
