@@ -17,7 +17,6 @@
 return [
     'except' => [
         'storage.*',     // file serving, never linked from Vue
-        'route.info',    // routing practice route in web.php
         'well-known.*',  // read by browsers/password managers, not by Vue
         'boost.*',       // Laravel Boost dev tooling
     ],

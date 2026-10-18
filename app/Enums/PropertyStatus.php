@@ -23,6 +23,11 @@ enum PropertyStatus: string
         };
     }
 
+    /**
+     * Some statuses only make sense for a certain listing type. For example,
+     * "sold" is only valid for sales, not rentals. Used by the property form
+     * (to offer only valid options) and by StorePropertyRequest::after().
+     */
     public function isAllowedFor(ListingType $listingType): bool
     {
         return match ($this) {
