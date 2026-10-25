@@ -11,6 +11,26 @@ export type Feature = {
     updated_at: string | null;
 };
 
+// Why: matches AgencyResource on the server.
+export type Agency = {
+    id: number;
+    name: string;
+    slug: string;
+    email: string;
+    phone: string;
+    is_active: boolean;
+    properties_count?: number; // only sent when the query counted it
+    created_at: string | null;
+    created_ago: string | null;
+};
+
+// Why: the agency list's query string, as returned by AgencyIndexRequest::filters().
+export type AgencyFilters = {
+    search: string | null;
+    status: 'active' | 'inactive' | null;
+    sort: 'name' | 'newest' | 'most_properties';
+};
+
 // Why: every paginated resource collection from Laravel has this same wrapper,
 // so it is written once and reused for property types and agencies.
 export type Paginated<T> = {

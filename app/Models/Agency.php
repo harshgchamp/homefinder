@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Models\Concerns\ClearsLookupCache;
 use App\Support\CachedLookups;
 use Database\Factories\AgencyFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,6 +23,18 @@ class Agency extends Model
      * @use HasFactory<AgencyFactory>
      */
     use ClearsLookupCache, HasFactory, Notifiable;
+
+    /**
+     * The sort options the admin list accepts: URL key => [column, direction].
+     * properties_count only exists when the query used withCount('properties').
+     *
+     * @var array<string, array{0: string, 1: 'asc'|'desc'}>
+     */
+    public const SORTS = [
+        'name' => ['name', 'asc'],
+        'newest' => ['created_at', 'desc'],
+        'most_properties' => ['properties_count', 'desc'],
+    ];
 
     protected $fillable = ['name', 'slug', 'email', 'phone', 'logo_path', 'is_active'];
 
@@ -58,6 +72,45 @@ class Agency extends Model
     public function enquiries(): HasManyThrough
     {
         return $this->hasManyThrough(Enquiry::class, Property::class);
+    }
+
+    /**
+     * Name or email contains the term. The inner where() groups the OR, so it
+     * becomes (name LIKE ? OR email LIKE ?) and cannot cancel other filters.
+     *
+     * @param  Builder<Agency>  $query
+     */
+    #[Scope]
+    protected function search(Builder $query, ?string $term): void
+    {
+        $query->when($term, fn (Builder $query, string $term) => $query->where(
+            fn (Builder $query) => $query->whereLike('name', "%{$term}%")->orWhereLike('email', "%{$term}%"),
+        ));
+    }
+
+    /**
+     * 'active' / 'inactive' from the filter; null means both.
+     *
+     * @param  Builder<Agency>  $query
+     */
+    #[Scope]
+    protected function status(Builder $query, ?string $status): void
+    {
+        $query->when($status, fn (Builder $query, string $status) => $query->where('is_active', $status === 'active'));
+    }
+
+    /**
+     * Sort by one of SORTS; unknown keys fall back to name. The id tie-breaker
+     * keeps pagination stable when two rows share a value.
+     *
+     * @param  Builder<Agency>  $query
+     */
+    #[Scope]
+    protected function sortBy(Builder $query, ?string $sort): void
+    {
+        [$column, $direction] = self::SORTS[$sort] ?? self::SORTS['name'];
+
+        $query->orderBy($column, $direction)->orderBy('id', $direction);
     }
 
     /**
