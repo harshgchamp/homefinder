@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AgencyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FeatureController;
 use App\Http\Controllers\Admin\NotificationController;
@@ -16,6 +17,11 @@ Route::middleware('can:manage-site')->group(function (): void {
     Route::resource('features', FeatureController::class)
         ->except('show')
         // Rate-limit only the routes that write (named limiter in AppServiceProvider).
+        ->middlewareFor(['store', 'update', 'destroy'], 'throttle:admin-writes');
+
+    // Agencies are site-wide too: an agent must not edit other agencies.
+    Route::resource('agencies', AgencyController::class)
+        ->except('show')
         ->middlewareFor(['store', 'update', 'destroy'], 'throttle:admin-writes');
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');

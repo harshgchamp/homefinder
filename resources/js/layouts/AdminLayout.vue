@@ -12,13 +12,14 @@ const links = computed(() =>
     [
         { title: 'Dashboard', href: '/admin', adminOnly: false },
         { title: 'Properties', href: '/admin/properties', adminOnly: false },
+        { title: 'Agencies', href: '/admin/agencies', adminOnly: true },
         { title: 'Features', href: '/admin/features', adminOnly: true },
         {
             title: 'Notifications',
             href: '/admin/notifications',
             adminOnly: true,
         },
-        // Property types, Agencies: added in the next steps
+        // Property types: added in a later step
     ].filter((link) => !link.adminOnly || isAdmin.value),
 );
 
