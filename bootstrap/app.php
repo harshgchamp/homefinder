@@ -12,6 +12,8 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -44,6 +46,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // 3. ALIAS — a short name, applied only where you choose
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
+            // Sanctum token abilities: abilities = must have ALL, ability = ANY one.
+            'abilities' => CheckAbilities::class,
+            'ability' => CheckForAnyAbility::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
