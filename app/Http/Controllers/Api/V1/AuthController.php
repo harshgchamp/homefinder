@@ -77,4 +77,18 @@ class AuthController extends Controller
 
         return response()->noContent(); // 204
     }
+
+    /**
+     * Delete every token the user has: all devices are logged out, including
+     * this one. "I think my account was hacked" / after a password change.
+     */
+    public function logoutAll(Request $request): Response
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $user->tokens()->delete();
+
+        return response()->noContent();
+    }
 }

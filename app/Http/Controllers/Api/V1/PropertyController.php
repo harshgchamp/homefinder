@@ -32,7 +32,7 @@ class PropertyController extends Controller
             // List columns only: no description, so each page stays small.
             ->select([
                 'id', 'title', 'slug', 'listing_type', 'status', 'price', 'bedrooms',
-                'bathrooms', 'city', 'postcode', 'published_at', 'property_type_id', 'created_at','latitude','longitude'
+                'bathrooms', 'city', 'postcode', 'published_at', 'property_type_id', 'created_at', 'latitude', 'longitude',
             ])
             // Eager load: 3 queries per page instead of 1 + 15 + 15 (N+1).
             ->with(['propertyType:id,name', 'mainImage'])

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\FavouriteController;
 use App\Http\Controllers\Api\V1\PropertyController;
+use App\Http\Controllers\Api\V1\TokenController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -34,6 +35,13 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::get('me', [AuthController::class, 'me'])->name('me');
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+        Route::post('logout-all', [AuthController::class, 'logoutAll'])->name('logout-all');
+
+        // Logged-in devices. whereNumber: /tokens/abc is a 404, not a type error.
+        Route::get('tokens', [TokenController::class, 'index'])->name('tokens.index');
+        Route::delete('tokens/{tokenId}', [TokenController::class, 'destroy'])
+            ->whereNumber('tokenId')
+            ->name('tokens.destroy');
 
         Route::get('favourites', [FavouriteController::class, 'index'])->name('favourites.index');
 
