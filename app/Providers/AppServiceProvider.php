@@ -113,6 +113,10 @@ class AppServiceProvider extends ServiceProvider
         // The JSON API (Block 5): per token user when logged in, else per IP.
         RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(60)
             ->by($request->user()?->id ? 'user:'.$request->user()->id : 'ip:'.$request->ip()));
+
+        // API login: brute-force protection, 5 tries a minute per email + IP.
+        RateLimiter::for('api-login', fn (Request $request): Limit => Limit::perMinute(5)
+            ->by($request->string('email')->lower().'|'.$request->ip()));
     }
 
     /**

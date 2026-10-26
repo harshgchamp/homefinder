@@ -32,3 +32,7 @@ Schedule::command('model:prune')->dailyAt('03:00')->onOneServer();
 // Failed jobs are kept in the failed_jobs table so they can be inspected and
 // retried (queue:failed, queue:retry). After a week, remove them.
 Schedule::command('queue:prune-failed', ['--hours' => 168])->daily()->onOneServer();
+
+// Expired API tokens no longer work, but their rows stay in
+// personal_access_tokens, one per login. Delete those expired 24+ hours ago.
+Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily()->onOneServer();
