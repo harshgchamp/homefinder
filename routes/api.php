@@ -39,6 +39,7 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
 
         // Logged-in devices. whereNumber: /tokens/abc is a 404, not a type error.
         Route::get('tokens', [TokenController::class, 'index'])->name('tokens.index');
+
         Route::delete('tokens/{tokenId}', [TokenController::class, 'destroy'])
             ->whereNumber('tokenId')
             ->name('tokens.destroy');
