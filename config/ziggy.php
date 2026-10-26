@@ -19,5 +19,6 @@ return [
         'storage.*',     // file serving, never linked from Vue
         'well-known.*',  // read by browsers/password managers, not by Vue
         'boost.*',       // Laravel Boost dev tooling
+        'api.*',         // JSON API for mobile/Postman clients, Vue never calls it
     ],
 ];
