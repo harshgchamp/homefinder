@@ -21,6 +21,16 @@ final readonly class PostcodeLocation
     ) {}
 
     /**
+     * Just the point on the map, e.g. for $property->location = $location->coordinates().
+     * A lookup answer (postcode + district + point) and a map point are different
+     * ideas, so they are two value objects.
+     */
+    public function coordinates(): Coordinates
+    {
+        return new Coordinates($this->latitude, $this->longitude);
+    }
+
+    /**
      * @return array{postcode: string, latitude: float, longitude: float, district: string|null}
      */
     public function toArray(): array

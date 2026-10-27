@@ -43,9 +43,8 @@ class PropertyResource extends JsonResource
 
             'city' => $this->city,
             'postcode' => $this->postcode,
-            'location' => $this->whenHas('latitude', fn () => $this->latitude !== null && $this->longitude !== null
-                ? ['latitude' => $this->latitude, 'longitude' => $this->longitude]
-                : null),
+            // The Coordinates cast: { latitude, longitude } when geocoded, null when not.
+            'location' => $this->whenHas('latitude', fn () => $this->location?->toArray()),
 
             'published_at' => $this->published_at?->toIso8601String(),
 
