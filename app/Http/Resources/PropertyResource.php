@@ -50,9 +50,9 @@ class PropertyResource extends JsonResource
 
             'address_line_1' => $this->whenHas('address_line_1'),
             // Filled in by the GeocodeProperty job; null until it has run.
-            'location' => $this->whenHas('latitude', fn () => $this->latitude !== null && $this->longitude !== null
-                ? ['latitude' => $this->latitude, 'longitude' => $this->longitude]
-                : null),
+            // whenHas: only when the query selected the column. $this->location is
+            // the Coordinates cast: an object when geocoded, null when not.
+            'location' => $this->whenHas('latitude', fn () => $this->location?->toArray()),
             'city' => $this->city,
             'postcode' => $this->postcode,
 

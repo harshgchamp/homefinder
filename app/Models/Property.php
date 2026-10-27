@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\Coordinates;
 use App\Enums\ListingType;
 use App\Enums\PropertyStatus;
 use App\Enums\PublicationStatus;
@@ -42,6 +43,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property CarbonImmutable|null $last_enquiry_at
  * @property float|null $latitude
  * @property float|null $longitude
+ * @property Coordinates|null $location
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  * @property CarbonImmutable|null $deleted_at
@@ -138,6 +140,10 @@ class Property extends Model
             // decimal columns come back from MySQL as strings; cast to numbers.
             'latitude' => 'float',
             'longitude' => 'float',
+            // Custom cast: no "location" column. Coordinates is Castable, so it names
+            // its own cast class (CoordinatesCast), which reads and writes both
+            // columns above as ONE value object.
+            'location' => Coordinates::class,
         ];
     }
 

@@ -64,6 +64,8 @@ class GeocodeProperty implements ShouldBeUnique, ShouldQueue
     {
         // toBase(): a plain UPDATE, so the property's updated_at is not changed
         // (finding a postcode on the map is not an edit by the admin).
+        // It also skips model casts, so the two columns are written directly here
+        // rather than through $property->location (the Coordinates cast).
         Property::query()
             ->whereKey($this->property->id)
             ->toBase()
