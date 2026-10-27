@@ -24,6 +24,17 @@ export type Agency = {
     created_ago: string | null;
 };
 
+// Why: matches NoteResource on the server. Used for property AND agency notes,
+// because both come from the same polymorphic notes table.
+export type Note = {
+    id: number;
+    body: string;
+    author: string;
+    created_ago: string | null;
+    created_at: string | null;
+    can_delete: boolean;
+};
+
 // Why: the agency list's query string, as returned by AgencyIndexRequest::filters().
 export type AgencyFilters = {
     search: string | null;

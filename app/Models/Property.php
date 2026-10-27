@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ListingType;
 use App\Enums\PropertyStatus;
 use App\Enums\PublicationStatus;
+use App\Models\Concerns\HasNotes;
 use App\Observers\PropertyObserver;
 use Carbon\CarbonImmutable;
 use Database\Factories\PropertyFactory;
@@ -53,7 +54,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Property extends Model
 {
     /** @use HasFactory<PropertyFactory> */
-    use HasFactory, Prunable, SoftDeletes;
+    use HasFactory, HasNotes, Prunable, SoftDeletes;
 
     /**
      * How long a property stays in the trash before `model:prune` removes it for good.

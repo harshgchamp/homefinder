@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\ClearsLookupCache;
+use App\Models\Concerns\HasNotes;
 use App\Support\CachedLookups;
 use Database\Factories\AgencyFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -22,7 +23,7 @@ class Agency extends Model
      *
      * @use HasFactory<AgencyFactory>
      */
-    use ClearsLookupCache, HasFactory, Notifiable;
+    use ClearsLookupCache, HasFactory, HasNotes, Notifiable;
 
     /**
      * The sort options the admin list accepts: URL key => [column, direction].

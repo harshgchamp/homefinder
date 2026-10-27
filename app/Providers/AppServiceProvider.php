@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Contracts\PostcodeLookup;
+use App\Models\Agency;
+use App\Models\Property;
 use App\Models\User;
 use App\Services\Postcodes\CachedPostcodeLookup;
 use App\Services\Postcodes\FakePostcodeLookup;
@@ -13,6 +15,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -150,6 +153,18 @@ class AppServiceProvider extends ServiceProvider
         Date::use(CarbonImmutable::class);
 
         Model::shouldBeStrict(! app()->isProduction());
+
+        // Polymorphic *_type columns (notes.notable_type, notifications.notifiable_type,
+        // personal_access_tokens.tokenable_type) store these short aliases instead of
+        // class names. Renaming or moving a class can then never break old rows.
+        // "enforce": using a model polymorphically WITHOUT an alias throws, so a new
+        // one cannot be forgotten. Existing rows were rewritten by the
+        // use_morph_aliases_for_existing_rows migration.
+        Relation::enforceMorphMap([
+            'user' => User::class,
+            'agency' => Agency::class,
+            'property' => Property::class,
+        ]);
 
         DB::prohibitDestructiveCommands(
             app()->isProduction(),

@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\AgencyIndexRequest;
 use App\Http\Requests\Admin\StoreAgencyRequest;
 use App\Http\Requests\Admin\UpdateAgencyRequest;
 use App\Http\Resources\AgencyResource;
+use App\Http\Resources\NoteResource;
 use App\Models\Agency;
 use App\Services\AgencyService;
 use Illuminate\Http\RedirectResponse;
@@ -59,6 +60,9 @@ class AgencyController extends Controller
         return Inertia::render('admin/agencies/Edit', [
             // resolve() gives a plain array, without the { data: ... } wrapper
             'agency' => AgencyResource::make($agency->loadCount('properties'))->resolve(),
+            // The polymorphic relation from the HasNotes trait, newest first.
+            // with('author:id,name'): one extra query for all authors, not one per note.
+            'notes' => NoteResource::collection($agency->notes()->with('author:id,name')->get())->resolve(),
         ]);
     }
 
