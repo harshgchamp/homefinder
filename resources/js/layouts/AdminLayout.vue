@@ -15,6 +15,11 @@ const links = computed(() =>
         { title: 'Agencies', href: '/admin/agencies', adminOnly: true },
         { title: 'Features', href: '/admin/features', adminOnly: true },
         {
+            title: 'Property types',
+            href: '/admin/property-types',
+            adminOnly: true,
+        },
+        {
             title: 'Notifications',
             href: '/admin/notifications',
             adminOnly: true,

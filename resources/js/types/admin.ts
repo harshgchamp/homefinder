@@ -24,6 +24,17 @@ export type Agency = {
     created_ago: string | null;
 };
 
+// Why: matches PropertyTypeResource on the server.
+export type PropertyType = {
+    id: number;
+    name: string;
+    slug: string;
+    properties_count?: number; // only sent when the query counted it
+    created_at: string | null;
+    created_ago: string | null;
+    updated_at: string | null;
+};
+
 // Why: matches NoteResource on the server. Used for property AND agency notes,
 // because both come from the same polymorphic notes table.
 export type Note = {
