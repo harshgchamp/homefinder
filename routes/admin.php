@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\NoteController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PropertyController;
 use App\Http\Controllers\Admin\PropertyExportController;
+use App\Http\Controllers\Admin\PropertyTypeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', DashboardController::class)->name('dashboard');
@@ -22,6 +23,12 @@ Route::middleware('can:manage-site')->group(function (): void {
 
     // Agencies are site-wide too: an agent must not edit other agencies.
     Route::resource('agencies', AgencyController::class)
+        ->except('show')
+        ->middlewareFor(['store', 'update', 'destroy'], 'throttle:admin-writes');
+
+    // Property types are a site-wide lookup list too. {property_type} in the URL
+    // binds to the controller's $propertyType argument.
+    Route::resource('property-types', PropertyTypeController::class)
         ->except('show')
         ->middlewareFor(['store', 'update', 'destroy'], 'throttle:admin-writes');
 
