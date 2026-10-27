@@ -2,10 +2,11 @@
 import { Deferred, Head, Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
+import NotesPanel from '@/components/admin/NotesPanel.vue';
 import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import type { Property } from '@/types';
+import type { Note, Property } from '@/types';
 
 type RecentEnquiry = {
     id: number;
@@ -18,6 +19,7 @@ type RecentEnquiry = {
 const props = defineProps<{
     property: Property;
     recentEnquiries: RecentEnquiry[];
+    notes: Note[];
     // Why optional: a deferred prop is missing on the first render and
     // arrives in a second request a moment later.
     enquiriesPerMonth?: { month: string; count: number }[];
@@ -287,6 +289,11 @@ const hideBrokenImage = (event: Event): void => {
                     </li>
                 </ul>
             </section>
+
+            <NotesPanel
+                :notes="notes"
+                :store-url="route('admin.properties.notes.store', property.id)"
+            />
         </aside>
     </div>
 </template>

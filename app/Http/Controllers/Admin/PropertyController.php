@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PropertyIndexRequest;
 use App\Http\Requests\Admin\StorePropertyRequest;
 use App\Http\Requests\Admin\UpdatePropertyRequest;
+use App\Http\Resources\NoteResource;
 use App\Http\Resources\PropertyResource;
 use App\Models\Enquiry;
 use App\Models\Property;
@@ -127,6 +128,9 @@ class PropertyController extends Controller
                     'email' => $enquiry->user->email,
                     'created_ago' => $enquiry->created_at?->diffForHumans(),
                 ]),
+
+            // Private notes (polymorphic, HasNotes trait). Same panel as the agency page.
+            'notes' => NoteResource::collection($property->notes()->with('author:id,name')->get())->resolve(),
 
             // Deferred: the page renders first, then Inertia fetches this in a
             // second request. Good for slower data the user can wait a moment for.

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AgencyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FeatureController;
+use App\Http\Controllers\Admin\NoteController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PropertyController;
 use App\Http\Controllers\Admin\PropertyExportController;
@@ -24,7 +25,13 @@ Route::middleware('can:manage-site')->group(function (): void {
         ->except('show')
         ->middlewareFor(['store', 'update', 'destroy'], 'throttle:admin-writes');
 
+    // Notes on an agency: inside this group, so admins only.
+    Route::post('agencies/{agency}/notes', [NoteController::class, 'storeForAgency'])
+        ->middleware('throttle:admin-writes')
+        ->name('agencies.notes.store');
+
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+
     Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
     // {id} is a UUID string (notifications use UUID primary keys), so whereUuid()
     // rejects anything else before the controller runs.
@@ -54,6 +61,19 @@ Route::patch('properties/{property}/restore', [PropertyController::class, 'resto
 Route::delete('properties/{property}/force', [PropertyController::class, 'forceDelete'])
     ->withTrashed()
     ->name('properties.force-delete');
+
+// --- Notes (polymorphic: one notes table for properties and agencies) ---
+
+// Outside the manage-site group: agents may add notes to their own agency's
+// properties (checked in NoteController with PropertyPolicy::update).
+Route::post('properties/{property}/notes', [NoteController::class, 'storeForProperty'])
+    ->middleware('throttle:admin-writes')
+    ->name('properties.notes.store');
+
+// One delete route for every note, whatever it is attached to. NotePolicy decides.
+Route::delete('notes/{note}', [NoteController::class, 'destroy'])
+    ->middleware('throttle:admin-writes')
+    ->name('notes.destroy');
 
 Route::resource('properties', PropertyController::class)
     // Only "show" can open a trashed property; edit/update/destroy still 404 for it.
