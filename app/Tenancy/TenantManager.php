@@ -41,7 +41,7 @@ final class TenantManager
         try {
             return $callback();
         } finally {
-            $this->switchTo($previous); // runs even after an exception
+            $this->switchTo($previous); // runs even after an exception ; "finally closes the locker even when the clerk faints."
         }
     }
 }
