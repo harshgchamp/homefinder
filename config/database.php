@@ -44,6 +44,22 @@ return [
             'transaction_mode' => 'DEFERRED',
         ],
 
+        // One database per organisation. TenantManager sets "database" at runtime.
+        // null by default: with no active tenant a query fails instead of
+        // reading another organisation's data.
+        'tenant' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => null,
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),

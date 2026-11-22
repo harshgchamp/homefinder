@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Postcodes\CachedPostcodeLookup;
 use App\Services\Postcodes\FakePostcodeLookup;
 use App\Services\Postcodes\PostcodesIoLookup;
+use App\Tenancy\TenantManager;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
@@ -33,6 +34,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->registerPostcodeLookup();
+
+        // One shared instance: everyone must see the same current tenant.
+        $this->app->singleton(TenantManager::class);
     }
 
     /**
